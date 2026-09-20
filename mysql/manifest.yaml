@@ -1,0 +1,68 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mysql-headless
+  namespace: expense
+spec:
+  clusterIP: None #for headless service there is no cluster ip
+  selector:
+    app: mysql
+    tier: db
+    project: expense
+  ports:
+    - protocol: TCP
+      port: 3306 # service port
+      targetPort: 3306 # container port
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mysql
+  namespace: expense
+spec:
+  selector:
+    app: mysql
+    tier: db
+    project: expense
+  ports:
+    - protocol: TCP
+      port: 3306 # service port
+      targetPort: 3306 # container port
+---
+apiVersion: v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: expense
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+      tier: db
+      project: expense
+  serviceName: "mysql-headless"#this is headless service should be mentioned in statefullset.
+  replicas: 2  
+  template:
+    metadata:
+      labels:
+        app: mysql
+        tier: db
+        project: expense
+    spec:
+      containers:
+        - name: mysql
+          image: bettari1993/mysql:v1
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql
+#this is pvc defination mentioned here.
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "expense-ebs"
+        resources:
+          requests:
+            storage: 15Gi
+    
