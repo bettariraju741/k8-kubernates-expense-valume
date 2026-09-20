@@ -4,15 +4,15 @@ metadata:
   name: mysql-headless
   namespace: expense
 spec:
-  clusterIP: None #for headless service there is no cluster ip
+  clusterIP: None # for headless service there is no cluster IP
   selector:
-    app: mysql
-    tier: db
     project: expense
+    component: mysql
+    tier: db
   ports:
-    - protocol: TCP
-      port: 3306 # service port
-      targetPort: 3306 # container port
+  - protocol: TCP
+    port: 3306 # service port
+    targetPort: 3306
 ---
 kind: Service
 apiVersion: v1
@@ -21,13 +21,13 @@ metadata:
   namespace: expense
 spec:
   selector:
-    app: mysql
-    tier: db
     project: expense
+    component: mysql
+    tier: db
   ports:
-    - protocol: TCP
-      port: 3306 # service port
-      targetPort: 3306 # container port
+  - protocol: TCP
+    port: 3306 # service port
+    targetPort: 3306
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -37,32 +37,31 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: mysql
-      tier: db
       project: expense
-  serviceName: "mysql-headless"#this is headless service should be mentioned in statefullset.
-  replicas: 2  
+      component: mysql
+      tier: db
+  serviceName: "mysql-headless" # this is the headless service should be mentioned for statefulset
+  replicas: 2 # 
   template:
     metadata:
       labels:
-        app: mysql
-        tier: db
         project: expense
+        component: mysql
+        tier: db
     spec:
       containers:
+      - name: mysql
+        image: joindevops/mysql:v1
+        volumeMounts:
         - name: mysql
-          image: bettari1993/mysql:v1
-          volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: mysql
-#this is pvc defination mentioned here.
+          mountPath: /var/lib/mysql
+  # This is PVC defnition, directly mentioned here
   volumeClaimTemplates:
-    - metadata:
-        name: mysql
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: "expense-ebs"
-        resources:
-          requests:
-            storage: 15Gi
-    
+  - metadata:
+      name: mysql
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "expense-ebs"
+      resources:
+        requests:
+          storage: 1Gi
