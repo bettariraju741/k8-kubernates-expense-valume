@@ -54,7 +54,7 @@ spec:
         image: bettari1993/mysql:v1
         env:
           - name: MYSQL_ROOT_PASSWORD
-            value: "YourStrongPassword"
+            value: "ExpenseApp@1"
         volumeMounts:
         - name: mysql
           mountPath: /var/lib/mysql
