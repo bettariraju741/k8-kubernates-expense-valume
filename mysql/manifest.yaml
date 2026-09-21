@@ -52,6 +52,9 @@ spec:
       containers:
       - name: mysql
         image: bettari1993/mysql:v1
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: "YourStrongPassword"
         volumeMounts:
         - name: mysql
           mountPath: /var/lib/mysql
